@@ -62,18 +62,58 @@ El contenido se obtiene via RSS publico: `https://www.youtube.com/feeds/videos.x
 
 1. Conecta tu repositorio de GitHub
 2. Anade las variables de entorno en Vercel:
-   - `DATABASE_URL` - URL de tu base de datos
+   - `TURSO_DATABASE_URL` - URL de tu base de datos Turso (libsql://...)
+   - `TURSO_AUTH_TOKEN` - Token de autenticacion de Turso
    - `CRON_SECRET` - String aleatorio para proteger el endpoint de refresh
 3. Despliega
 
-### Base de datos para produccion
+### Base de datos para produccion (Turso)
 
-En Vercel necesitas PostgreSQL (SQLite no funciona en serverless). Opciones gratuitas:
+SQLite no persiste datos en Vercel (serverless). Usamos **Turso**, una base de datos SQLite serverless gratuita.
 
-- **Supabase:** Crea un proyecto gratis. `Project Settings > Database > Connection string` -> lo usas como `DATABASE_URL`
-- **Vercel Postgres:** Plan Pro.
+#### Crear base de datos en Turso
 
-Luego ejecuta `npx prisma db push` contra la base remota.
+1. Crea una cuenta gratis en [turso.tech](https://turso.tech) (con GitHub basta)
+2. Instala la CLI de Turso:
+   ```bash
+   npm install -g turso
+   # o en macOS: brew install tursodatabase/tap/turso
+   ```
+3. Inicia sesion:
+   ```bash
+   turso auth login
+   ```
+4. Crea la base de datos:
+   ```bash
+   turso db create ia-dashboard
+   ```
+5. Obtén la URL de conexion (libSQL):
+   ```bash
+   turso db show ia-dashboard --url
+   # Copia la URL (empieza por libsql://...)
+   ```
+6. Genera un token de autenticacion:
+   ```bash
+   turso db tokens create ia-dashboard
+   # Copia el token generado
+   ```
+
+Luego pega esos dos valores en las variables de entorno de Vercel: `TURSO_DATABASE_URL` y `TURSO_AUTH_TOKEN`.
+
+#### Migraciones (schema)
+
+Cuando cambies el schema de Prisma, ejecuta localmente contra SQLite y luego replica los cambios a Turso:
+
+```bash
+# 1. Aplica cambios localmente
+npx prisma db push
+
+# 2. Replica el schema a Turso (necesitas turso CLI instalado)
+turso db shell ia-dashboard < prisma/schema.prisma
+# O, alternativamente, usa el comando:
+npx prisma db push --accept-data-loss
+# con DATABASE_URL apuntando a la URL de Turso
+```
 
 ## Actualizacion automatica (Cron)
 
