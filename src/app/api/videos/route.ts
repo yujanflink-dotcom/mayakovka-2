@@ -1,27 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { getChannelVideosRSS } from '@/lib/youtube';
+import { CATEGORIES, CONFIG } from '@/lib/config';
 
 export async function GET(request: NextRequest) {
-  const category = request.nextUrl.searchParams.get('category') || 'all';
+  const categoryParam = request.nextUrl.searchParams.get('category') || 'all';
 
   try {
-    const where: Record<string, unknown> = {};
-    if (category !== 'all') {
-      where.category = category;
+    const categoriesToFetch =
+      categoryParam === 'all'
+        ? CATEGORIES
+        : CATEGORIES.filter((c) => c.id === categoryParam);
+
+    const allVideos: Array<{
+      videoId: string;
+      title: string;
+      description: string;
+      channelId: string;
+      channelTitle: string;
+      thumbnailUrl: string;
+      publishedAt: string;
+      category: string;
+    }> = [];
+    const seenIds = new Set<string>();
+
+    for (const category of categoriesToFetch) {
+      if (category.channels.length === 0) continue;
+
+      for (const channelId of category.channels) {
+        try {
+          const videos = await getChannelVideosRSS(channelId, CONFIG.videosPerChannel);
+          for (const v of videos) {
+            if (!seenIds.has(v.videoId)) {
+              seenIds.add(v.videoId);
+              allVideos.push({ ...v, category: category.id });
+            }
+          }
+        } catch (err) {
+          console.error(`Error fetching RSS for channel ${channelId}:`, err);
+        }
+      }
     }
 
-    const videos = await prisma.video.findMany({
-      where,
-      orderBy: { publishedAt: 'desc' },
-    });
-
-    const meta = await prisma.cacheMeta.findUnique({
-      where: { id: 'singleton' },
-    });
+    allVideos.sort(
+      (a, b) =>
+        new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime(),
+    );
 
     return NextResponse.json({
-      videos,
-      lastRefreshed: meta?.lastRefreshed || null,
+      videos: allVideos,
+      lastRefreshed: null,
     });
   } catch (error) {
     console.error('Error fetching videos:', error);

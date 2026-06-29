@@ -27,6 +27,10 @@ export async function getChannelVideosRSS(
       'User-Agent': 'Mozilla/5.0 (compatible; IADashboard/1.0)',
       Accept: 'application/atom+xml',
     },
+    next: {
+      revalidate: 21600,
+      tags: ['rss-feeds'],
+    },
   });
 
   if (!res.ok) {

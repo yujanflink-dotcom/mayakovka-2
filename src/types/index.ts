@@ -1,13 +1,12 @@
 export interface VideoData {
-  id: string;
   videoId: string;
   title: string;
-  description: string | null;
-  channelId: string | null;
-  channelTitle: string | null;
-  thumbnailUrl: string | null;
+  description: string;
+  channelId: string;
+  channelTitle: string;
+  thumbnailUrl: string;
   publishedAt: string;
-  duration: string | null;
+  duration?: string;
   category: string;
 }
 
