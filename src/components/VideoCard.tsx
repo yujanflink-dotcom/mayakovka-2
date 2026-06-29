@@ -5,7 +5,7 @@ import { Heart } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { VideoData, VideoState } from '@/types';
-import { CATEGORY_COLORS, CATEGORY_COLORS_RGB } from '@/lib/colors';
+import { CATEGORY_COLORS } from '@/lib/colors';
 
 interface VideoCardProps {
   video: VideoData;
@@ -30,7 +30,6 @@ function setStoredState(videoId: string, state: VideoState) {
 export function VideoCard({ video, index = 0 }: VideoCardProps) {
   const [favorited, setFavorited] = useState(false);
   const color = CATEGORY_COLORS[video.category] || '#3B82F6';
-  const rgb = CATEGORY_COLORS_RGB[video.category] || '59,130,246';
 
   useEffect(() => {
     const states = getStoredStates();
@@ -56,22 +55,12 @@ export function VideoCard({ video, index = 0 }: VideoCardProps) {
   return (
     <div
       onClick={handleClick}
-      className="group relative bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden
-                 hover:scale-[1.02] transition-all duration-200 cursor-pointer animate-fade-in-up"
+      className="relative bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden
+                 active:scale-[0.97] transition-all duration-150 cursor-pointer animate-fade-in-up"
       style={{
         borderTopColor: color,
         borderTopWidth: '2px',
-        boxShadow: `0 0 0 0 rgba(${rgb},0)`,
         animationDelay: `${index * 50}ms`,
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = color;
-        e.currentTarget.style.boxShadow = `0 8px 30px rgba(${rgb},0.2)`;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = '';
-        e.currentTarget.style.boxShadow = '';
       }}
     >
       <div className="relative aspect-video bg-gray-800 overflow-hidden">
@@ -80,7 +69,7 @@ export function VideoCard({ video, index = 0 }: VideoCardProps) {
             src={video.thumbnailUrl}
             alt={video.title}
             loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-600">
@@ -89,19 +78,19 @@ export function VideoCard({ video, index = 0 }: VideoCardProps) {
         )}
 
         {video.duration && (
-          <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 bg-black/80 text-xs font-medium rounded">
+          <span className="absolute bottom-2 right-2 px-2 py-0.5 bg-black/80 text-xs font-medium rounded-md">
             {video.duration}
           </span>
         )}
 
         <button
           onClick={handleFavorite}
-          className="absolute top-2 right-2 p-1.5 rounded-xl bg-black/50 opacity-0 group-hover:opacity-100
-                     hover:bg-black/70 transition-all duration-200 backdrop-blur-sm"
+          className="absolute top-2 right-2 flex items-center justify-center min-w-[40px] min-h-[40px]
+                     rounded-xl bg-black/50 backdrop-blur-sm transition-all duration-200 active:scale-90"
           aria-label={favorited ? 'Quitar de favoritos' : 'Anadir a favoritos'}
         >
           <Heart
-            size={16}
+            size={18}
             className={
               favorited
                 ? 'fill-red-500 text-red-500 drop-shadow-[0_0_4px_rgba(239,68,68,0.6)]'
@@ -109,16 +98,13 @@ export function VideoCard({ video, index = 0 }: VideoCardProps) {
             }
           />
         </button>
-
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-200" />
       </div>
 
-      <div className="p-3 space-y-1.5">
-        <h3 className="text-sm font-bold leading-snug line-clamp-2 transition-colors duration-200"
-            style={{ color }}>
+      <div className="p-3 md:p-4 space-y-1.5">
+        <h3 className="text-base font-bold leading-snug line-clamp-2" style={{ color }}>
           {video.title}
         </h3>
-        <div className="flex items-center gap-2 text-xs text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
           {video.channelTitle && (
             <span className="truncate">{video.channelTitle}</span>
           )}

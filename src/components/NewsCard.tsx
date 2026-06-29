@@ -17,7 +17,7 @@ export function NewsCard({ item, index = 0 }: NewsCardProps) {
     }
   };
 
-  const maxDescLength = 250;
+  const maxDescLength = 200;
   const truncatedDesc =
     item.description.length > maxDescLength
       ? item.description.slice(0, maxDescLength) + '...'
@@ -26,17 +26,17 @@ export function NewsCard({ item, index = 0 }: NewsCardProps) {
   return (
     <div
       onClick={openArticle}
-      className="group relative bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden
-                 hover:scale-[1.02] transition-all duration-200 cursor-pointer animate-fade-in-up"
+      className="relative bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden
+                 active:scale-[0.97] transition-all duration-150 cursor-pointer animate-fade-in-up"
       style={{
         borderTopColor: '#14B8A6',
         borderTopWidth: '2px',
         animationDelay: `${index * 50}ms`,
       }}
     >
-      <div className="p-4 space-y-2.5">
-        <div className="flex items-center gap-2 text-xs text-gray-500">
-          <Newspaper size={14} className="text-teal-400 shrink-0" />
+      <div className="p-4 md:p-5 space-y-3">
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <Newspaper size={16} className="text-teal-400 shrink-0" />
           <span className="font-medium text-teal-400">{item.source}</span>
           <span>&middot;</span>
           <span className="shrink-0">
@@ -47,12 +47,12 @@ export function NewsCard({ item, index = 0 }: NewsCardProps) {
           </span>
         </div>
 
-        <h3 className="text-sm font-bold leading-snug line-clamp-2 text-white group-hover:text-teal-400 transition-colors">
+        <h3 className="text-base font-bold leading-snug line-clamp-2 text-white">
           {item.title}
         </h3>
 
         {truncatedDesc && (
-          <p className="text-xs text-gray-400 leading-relaxed line-clamp-3">
+          <p className="text-sm text-gray-400 leading-relaxed line-clamp-3">
             {truncatedDesc}
           </p>
         )}
