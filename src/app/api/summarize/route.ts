@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { YoutubeTranscript } from 'youtube-transcript';
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { unstable_cache } from 'next/cache';
 
 const SYSTEM_PROMPT = `Eres un asistente que resume videos de YouTube en español.
@@ -14,21 +14,21 @@ async function fetchTranscript(videoId: string): Promise<string> {
 }
 
 async function generateSummary(transcript: string): Promise<string> {
-  const anthropic = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY || '',
+  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || '');
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    systemInstruction: SYSTEM_PROMPT,
   });
 
-  const msg = await anthropic.messages.create({
-    model: 'claude-haiku-4-5-20250416',
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: [{ role: 'user', content: transcript }],
-  });
+  const result = await model.generateContent(transcript);
+  const response = result.response;
+  const text = response.text();
 
-  return msg.content
-    .filter((b) => b.type === 'text')
-    .map((b) => b.text)
-    .join('\n');
+  if (!text) {
+    throw new Error('Respuesta vacia del modelo');
+  }
+
+  return text;
 }
 
 const getCachedSummary = unstable_cache(
@@ -47,9 +47,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Falta videoId' }, { status: 400 });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env.GOOGLE_API_KEY) {
     return NextResponse.json(
-      { error: 'ANTHROPIC_API_KEY no configurada' },
+      { error: 'GOOGLE_API_KEY no configurada' },
       { status: 500 },
     );
   }
