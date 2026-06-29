@@ -86,16 +86,15 @@ export function SummaryModal({ videoId, videoTitle, onClose }: SummaryModalProps
           <p className="text-sm text-gray-400 mb-4 line-clamp-2">{videoTitle}</p>
 
           {loading ? (
-            <div className="space-y-3">
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="flex gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-gray-700 mt-1.5 shrink-0" />
-                  <div
-                    className="h-4 bg-gray-800 rounded animate-pulse flex-1"
-                    style={{ animationDelay: `${i * 100}ms` }}
-                  />
-                </div>
-              ))}
+            <div className="py-6 space-y-4">
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+                <Sparkles size={16} className="text-yellow-400 animate-pulse" />
+                <span>Generando resumen...</span>
+              </div>
+              <p className="text-xs text-gray-500 text-center">
+                Gemini esta viendo el video para extraer los puntos clave.
+                Puede tardar unos segundos si el video es extenso.
+              </p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
