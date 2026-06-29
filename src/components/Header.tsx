@@ -3,16 +3,15 @@
 import { useEffect, useState } from 'react';
 import { RefreshCw, Search, Youtube } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 interface HeaderProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onRefresh: () => void;
   refreshing: boolean;
-  lastRefreshed: Date | null;
-  videoCount: number;
+  itemCount: number;
+  timeFilter: string;
+  onTimeFilterChange: (value: string) => void;
 }
 
 export function Header({
@@ -20,8 +19,9 @@ export function Header({
   onSearchChange,
   onRefresh,
   refreshing,
-  lastRefreshed,
-  videoCount,
+  itemCount,
+  timeFilter,
+  onTimeFilterChange,
 }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
 
@@ -49,7 +49,7 @@ export function Header({
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
           <input
             type="text"
-            placeholder="Buscar videos por titulo o canal..."
+            placeholder="Buscar videos o noticias..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-gray-800/80 border border-gray-700/50 rounded-xl text-sm
@@ -58,20 +58,33 @@ export function Header({
           />
         </div>
 
-        {lastRefreshed && (
-          <span className="text-xs text-gray-500 hidden lg:block shrink-0">
-            Actualizado{' '}
-            {formatDistanceToNow(lastRefreshed, { addSuffix: true, locale: es })}
-          </span>
-        )}
+        <div className="flex items-center gap-1 shrink-0">
+          {[
+            { value: 'all', label: 'Recientes' },
+            { value: '24h', label: '24h' },
+            { value: 'week', label: '7d' },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => onTimeFilterChange(opt.value)}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+                timeFilter === opt.value
+                  ? 'bg-blue-600/20 text-blue-400'
+                  : 'bg-gray-800/80 text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
-        <span className="text-xs text-gray-500 shrink-0">{videoCount}</span>
+        <span className="text-xs text-gray-500 shrink-0">{itemCount}</span>
 
         <button
           onClick={onRefresh}
           disabled={refreshing}
           className="p-2 rounded-xl bg-gray-800/80 hover:bg-gray-700 disabled:opacity-50 transition-all shrink-0 backdrop-blur-sm"
-          title="Actualizar videos"
+          title="Actualizar"
         >
           <RefreshCw size={18} className={`text-gray-300 ${refreshing ? 'animate-spin' : ''}`} />
         </button>

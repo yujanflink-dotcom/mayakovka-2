@@ -7,9 +7,10 @@ export async function GET(request: NextRequest) {
 
   try {
     const categoriesToFetch =
-      categoryParam === 'all'
+      (categoryParam === 'all'
         ? CATEGORIES
-        : CATEGORIES.filter((c) => c.id === categoryParam);
+        : CATEGORIES.filter((c) => c.id === categoryParam)
+      ).filter((c) => c.type !== 'news');
 
     const allVideos: Array<{
       videoId: string;

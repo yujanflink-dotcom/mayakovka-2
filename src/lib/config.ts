@@ -2,6 +2,14 @@ import { CategoryConfig } from '@/types';
 
 export const CATEGORIES: CategoryConfig[] = [
   {
+    id: 'noticias',
+    name: 'Noticias',
+    description: 'Articulos y anuncios oficiales de OpenAI, Anthropic y mas',
+    channels: [],
+    keywords: [],
+    type: 'news',
+  },
+  {
     id: 'general-news',
     name: 'Noticias generales',
     description: 'Lanzamientos, anuncios y eventos del sector IA',
