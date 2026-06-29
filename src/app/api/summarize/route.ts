@@ -13,21 +13,17 @@ async function generateSummary(videoId: string): Promise<string> {
     systemInstruction: PROMPT,
   });
 
-  const result = await model.generateContent({
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          {
-            fileData: {
-              mimeType: 'video/*',
-              fileUri: `https://www.youtube.com/watch?v=${videoId}`,
-            },
-          },
-        ],
+  const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+  const result = await model.generateContent([
+    {
+      fileData: {
+        fileUri: videoUrl,
+        mimeType: 'video/*',
       },
-    ],
-  });
+    },
+    { text: PROMPT },
+  ]);
 
   const response = result.response;
   const text = response.text();
