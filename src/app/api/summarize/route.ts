@@ -65,6 +65,25 @@ export async function GET(request: NextRequest) {
     const result = await getCachedSummary(videoId);
     return NextResponse.json(result);
   } catch (err: unknown) {
+    let detail = '';
+    if (err instanceof Error) {
+      const parts = [`[${err.constructor.name}] ${err.message}`];
+      if ('status' in err) parts.push(`status=${(err as any).status}`);
+      if ('statusText' in err) parts.push(`statusText=${(err as any).statusText}`);
+      if ('response' in err) {
+        const resp = (err as any).response;
+        parts.push(`response=${typeof resp === 'object' ? JSON.stringify(resp, null, 2) : resp}`);
+      }
+      if ('errorDetails' in err) {
+        parts.push(`errorDetails=${JSON.stringify((err as any).errorDetails)}`);
+      }
+      if (err.stack) parts.push(`stack=${err.stack}`);
+      detail = parts.join(' | ');
+    } else {
+      detail = String(err);
+    }
+    console.error('Summarize error:', detail);
+
     const msg = err instanceof Error ? err.message.toLowerCase() : '';
     if (
       msg.includes('not found') ||
@@ -78,13 +97,13 @@ export async function GET(request: NextRequest) {
           videoId,
           error:
             'Gemini no pudo procesar este video. Puede ser privado, no disponible o muy extenso.',
+          detail,
         },
         { status: 404 },
       );
     }
-    console.error('Summarize error:', err);
     return NextResponse.json(
-      { error: 'Error al generar resumen' },
+      { error: 'Error al generar resumen', detail },
       { status: 500 },
     );
   }
